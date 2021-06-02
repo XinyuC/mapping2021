@@ -48,21 +48,27 @@ lat_giant = 40.803392518674414;
 lon_giant =  -77.88695368465353;
 zoom_level_3 = 20;
 
-%% Test function
+%% Prepare the workspace
 close all
 clc
+
+
+%% Example 1
 coord_1 = [lat_texas, lon_texas];
 map_image_1 = fcn_geoplot_imageFromLLAandZoomLevel(coord_1, zoom_level_1);
+figure;
+imshow(map_image_1)
 
+%% Example 2: uses the satellite as base map
 coord_2 = [lat_reber, lon_reber];
 map_image_2 = fcn_geoplot_imageFromLLAandZoomLevel(coord_2, zoom_level_2, satellite_basemap_name);
+figure;
+imshow(map_image_2);
 
 
+%% Example 2: uses the satellite as base map
 coord_3 = [lat_giant, lon_giant];
 map_image_3 = fcn_geoplot_imageFromLLAandZoomLevel(coord_3, zoom_level_3, OSM_basemap_name);
-
-%% Show the image
-imshow(map_image_1)
-% imshow(map_image_2)
-% imshow(map_image_3)
+figure;
+imshow(map_image_3)
 
