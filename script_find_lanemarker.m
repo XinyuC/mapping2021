@@ -15,6 +15,7 @@ map_mat = map_struct.big_imag;
 % map_mat = map_struct.original_map;
 fig_1 = figure(1)
 imshow(map_mat)
+% Set layout
 fig_1.CurrentAxes.InnerPosition = fig_1.CurrentAxes.OuterPosition;
 X_original_lim = fig_1.CurrentAxes.XLim;
 Y_original_lim = fig_1.CurrentAxes.YLim;
@@ -47,7 +48,7 @@ rescaled_v = rescale(v_value);
 image_road_rescaled = image_road_hsv;
 image_road_rescaled(:,:,3) = rescaled_v;
 
-% Cluster v values
+% Cluster V values
 sz = size(rescaled_v);
 Nrows = sz(1);
 Ncols = sz(2);
@@ -59,8 +60,7 @@ all_v = reshape(rescaled_v,Nrows*Ncols,1);
 
 
 %% Build hsv mask
-% unique_h = unique(crop_h);
-% background_h = 
+
 clc
 lower_val = min(V_center);
 upper_val = max(V_center);
@@ -140,13 +140,14 @@ end
 
 %% The following sections still have some problems
 
-%% Find the latitude and longtitude limits for the current figure,
-%     and Convert pixels to LLA coordinates
+%% Find the latitude and longtitude limits for the current figure, and Convert pixels to LLA coordinates
 
+%Get limits
 lon_value = big_lonVec(X_lim).';
 lat_value = big_latVec(Y_lim).';
 lat_lim =sort(lat_value);
 lon_lim =sort(lon_value);
+%  Convert pixels to LLA coordinates
 rasterSize = [Nrows Ncols];
 R = georefcells(lat_lim, lon_lim, rasterSize);
 flipmap = flipud(reducedmap);
@@ -158,9 +159,8 @@ fig_r = figure(10);
 % fig_r.Position = fig_2.Position;
 satellite_basemap_name = 'satellite';
 
-% %  Geobubble
+%  Geobubble
 gb1 = geobubble(lat_data, lon_data, 'Basemap',satellite_basemap_name );
-
 gb1.MapLayout = 'maximized';
 % gb1.ZoomLevel = starting_zoom;
 gb1.BubbleWidthRange = 1;
