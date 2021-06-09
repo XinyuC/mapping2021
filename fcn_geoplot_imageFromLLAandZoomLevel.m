@@ -38,4 +38,3 @@ end
 pause(1);
 frame = getframe(fig);
 map_image = frame.cdata;
-close(fig);
