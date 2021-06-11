@@ -2,13 +2,18 @@
 close all
 clear all
 clc
-image_road_rgb = imread('test09.jpg');
+
+% Load the image
+image_road_rgb = imread('test04.jpg');
 
 
-% Smooth the image
-image_road_blur = imgaussfilt(image_road_rgb, 15);
+%% Smooth the image
+%image_road_blur = imgaussfilt(image_road_rgb, 15);
+image_road_blur = image_road_rgb;
+
 % Convert the RGB to HSV
 image_road_hsv = rgb2hsv(image_road_blur);
+
 % Scale the HSV data to the interval [0, 1]
 image_road_rescale = image_road_hsv;
 image_road_rescale(:,:,1) = rescale( image_road_hsv(:,:,1));
@@ -30,39 +35,120 @@ all_v = all_hsv(:,3);
 all_hs = [all_h, all_s];
 
 %% Show figures and plots to analy
+% Original image
+fig_1 = figure(1);
+imshow(image_road_rgb);
+title('Original');
+
+% Blurred image
+fig_11 = figure(11);
+imshow(image_road_blur);
+title('Original blurred');
+
 % Image in HSV color
-% fig_2 = figure(2);
-% imshow(image_road_hsv)
+fig_2 = figure(2);
+imshow(image_road_hsv)
+title('HSV image');
 
 % Visualize the rescaled image
-% figure(3)
-% imshow(image_road_rescale)
+figure(3)
+imshow(image_road_rescale)
+title('Rescaled image');
 
 % Visualize the H value of the rescaled matrix
-% figure(4)
-% imshow(image_road_rescale(:,:,1))
+figure(4)
+imshow(image_road_rescale(:,:,1))
+title('H space only from HSV image')
+
+% Visualize the H value of the rescaled matrix
+figure(45)
+imshow(image_road_rescale(:,:,2))
+title('S space only from HSV image')
 
 % Visualize the V value of the rescaled matrix
-% figure(5)
-% imshow(image_road_rescale(:,:,3))
+figure(5)
+imshow(image_road_rescale(:,:,3))
+title('V space only from HSV image')
 
 % Visualize the S vs H plot
-% figure(6)
-% plot(all_h, all_s, '.')
-% xlabel('Hue')
-% ylabel('Sat')
+figure(6)
+plot(all_h, all_s, '.','Markersize',0.05)
+xlabel('Hue')
+ylabel('Sat')
+title('Hue versus Saturation');
 
-% Visualize the V vs H plot
-% figure(7)
-% plot(all_h, all_v, '.')
-% xlabel('Hue')
-% ylabel('Val')
+% Visualize the S vs H plot
+figure(66)
+clf;
+hold on;
+for ith_point = 1:1000:length(all_h)
+    rgb_color = hsv2rgb([all_h(ith_point) all_s(ith_point) 0.8]);
+    plot(all_h(ith_point), all_s(ith_point), '.','Markersize',0.5,'Color',rgb_color);
+end
+xlabel('Hue')
+ylabel('Sat')
+title('Hue versus Saturation');
+
+%% Try a manual method first (to see if it works)
+indices_yellow_line = find((image_road_rescale(:,:,1)>0.1) & (image_road_rescale(:,:,1)<0.13) & (image_road_rescale(:,:,2)>0.35));
+
+% Set entire image to zero
+image_yellow_line = 0*image_road_rgb;
+
+% Set the "found" values back to the original image
+image_yellow_line(indices_yellow_line) = image_road_rgb(indices_yellow_line);
+
+% Show the results
+figure(67);
+clf;
+imshow(image_yellow_line);
+
+%% Try a manual method first (to see if it works)
+indices_white_line = find((image_road_rescale(:,:,1)>0.01) & (image_road_rescale(:,:,1)<0.2) & (image_road_rescale(:,:,2)>0.1));
+
+% Set entire image to zero
+image_white_line = 0*image_road_rgb;
+
+% Set the "found" values back to the original image
+image_white_line(indices_white_line) = image_road_rgb(indices_white_line);
+
+% Show the results
+figure(68);
+clf;
+imshow(image_white_line);
+
+%% Try a manual method first (to see if it works)
+indices_yellow_line = find((image_road_rescale(:,:,2)>0.35));
+
+% Set entire image to zero
+image_yellow_line = 0*image_road_rgb;
+
+% Set the "found" values back to the original image
+image_yellow_line(indices_yellow_line) = image_road_rgb(indices_yellow_line);
+
+% Show the results
+figure(69);
+clf;
+imshow(image_yellow_line);
+
+
+%% Figure out where threshold should be in saturation
+figure(661);
+histogram(all_s,300);
+xlabel('Saturation value');
+
+
+%% Visualize the V vs H plot
+figure(7)
+plot(all_h, all_v, '.')
+xlabel('Hue')
+ylabel('Val')
 
 % Visualize the V vs s plot
-% figure(8)
-% plot(all_s, all_v, '.')
-% xlabel('Sat')
-% ylabel('Val')
+figure(8)
+plot(all_s, all_v, '.')
+xlabel('Sat')
+ylabel('Val')
 
 
 %% K-mean cluster for h
