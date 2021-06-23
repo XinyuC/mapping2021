@@ -93,19 +93,27 @@ rounded_s = round(Nbins*all_s)+1;
 
 % Create an accumulation array, show in mesh
 counts = accumarray([rounded_s,rounded_h], 1,[],[],NaN);  %remember Y corresponds to rows
-counts(1:15,:) = nan; % Shut off values for hue less than 0.15, which are values of 15 or less (since we multiply by 100)
+
+% Next, shut off values for saturation less than 0.15, which are values of 15 or
+% less (since we multiply by 100). Low saturation values mean that the
+% lighting is very poor, or the pixels are basically versions of grey.
+% These won't have any color information that we typically need for lane
+% detection.
+counts(1:15,:) = nan; 
 figure(999); mesh(counts); % Show the results on a mesh
 xlabel('Hue')
 ylabel('Saturation');
 
-% Create an accumulation array, show in contour
+% Create an accumulation array, show in contour. This does NOT remove zero
+% values, because the contour command does not work right if the zeros are
+% removed.
 counts_contour = accumarray([rounded_s,rounded_h], 1);  %remember Y corresponds to rows
 counts_contour(1:15,:) = nan; % Shut off values for hue less than 0.15, which are values of 15 or less (since we multiply by 100)
 figure(998); contour(counts_contour,30); % Show the results on a mesh
 xlabel('Hue')
 ylabel('Saturation');
 
-% Put the results in a scaled figure
+% Put the results in a scaled image. 
 figure(997);
 imagesc(flipud(counts_contour), 'XData', (rounded_h-1)/Nbins + 1/(2*Nbins), 'YData', (rounded_s-1)/Nbins + + 1/(2*Nbins));
 xlabel('Hue')
