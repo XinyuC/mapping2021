@@ -4,7 +4,7 @@ clear all
 clc
 
 % Load the image
-image_road_rgb = imread('test04.jpg');
+image_road_rgb = imread('..\images\test04.jpg');
 
 
 %% Smooth the image
@@ -70,14 +70,49 @@ figure(5)
 imshow(image_road_rescale(:,:,3))
 title('V space only from HSV image')
 
-% Visualize the S vs H plot
+%% Visualize the S vs H plot
 figure(6)
+clf;
 plot(all_h, all_s, '.','Markersize',0.05)
 xlabel('Hue')
 ylabel('Sat')
 title('Hue versus Saturation');
 
-% Visualize the S vs H plot
+
+%% Perform data density analysis
+% See: https://www.mathworks.com/matlabcentral/answers/225934-using-matlab-to-plot-density-contour-for-scatter-plot?s_tid=srchtitle
+% See: https://www.mathworks.com/matlabcentral/answers/478785-joint-histogram-2-d?s_tid=srchtitle
+% See: https://www.mathworks.com/matlabcentral/answers/520819-need-help-with-surf-x-y-and-temperature?s_tid=srchtitle
+
+
+Nbins = 100; % How many intervals H and S space will be divided into
+
+% Push the s-values and h values 
+rounded_h = round(Nbins*all_h)+1;
+rounded_s = round(Nbins*all_s)+1;
+
+% Create an accumulation array, show in mesh
+counts = accumarray([rounded_s,rounded_h], 1,[],[],NaN);  %remember Y corresponds to rows
+counts(1:15,:) = nan; % Shut off values for hue less than 0.15, which are values of 15 or less (since we multiply by 100)
+figure(999); mesh(counts); % Show the results on a mesh
+xlabel('Hue')
+ylabel('Saturation');
+
+% Create an accumulation array, show in contour
+counts_contour = accumarray([rounded_s,rounded_h], 1);  %remember Y corresponds to rows
+counts_contour(1:15,:) = nan; % Shut off values for hue less than 0.15, which are values of 15 or less (since we multiply by 100)
+figure(998); contour(counts_contour,30); % Show the results on a mesh
+xlabel('Hue')
+ylabel('Saturation');
+
+% Put the results in a scaled figure
+figure(997);
+imagesc(flipud(counts_contour), 'XData', (rounded_h-1)/Nbins + 1/(2*Nbins), 'YData', (rounded_s-1)/Nbins + + 1/(2*Nbins));
+xlabel('Hue')
+ylabel('Saturation');
+hold on
+
+%% Visualize the S vs H plot
 figure(66)
 clf;
 hold on;
@@ -88,6 +123,8 @@ end
 xlabel('Hue')
 ylabel('Sat')
 title('Hue versus Saturation');
+
+
 
 %% Try a manual method first (to see if it works)
 indices_yellow_line = find((image_road_rescale(:,:,1)>0.1) & (image_road_rescale(:,:,1)<0.13) & (image_road_rescale(:,:,2)>0.35));
