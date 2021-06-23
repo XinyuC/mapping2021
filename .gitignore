@@ -1,6 +1,7 @@
 # GITIGNORE template for MATLAB and SIMULINK
 
-# Ignore the big data file 
+# Ignore the big data files
+Data/ 
 testTrackData.mat
 testTrackImage.mat
 
