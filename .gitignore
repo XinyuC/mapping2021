@@ -5,6 +5,9 @@ Data/
 testTrackData.mat
 testTrackImage.mat
 
+# Ignore the api keys (to avoid misuse)
+api_key.mat
+
 # Windows default autosave extension
 *.asv
 
