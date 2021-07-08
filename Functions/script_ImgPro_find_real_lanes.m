@@ -4,9 +4,9 @@ clear all
 clc
 
 % Load the image
-image_road_rgb = imread('..\images\test04.jpg');
+image_road_rgb = imread('..\images\colors_8pm_cloudy.jpg');
 
-
+% image_road_rgb = imread('..\images\colors_11am_sunny.jpg');
 %% Smooth the image
 %image_road_blur = imgaussfilt(image_road_rgb, 15);
 image_road_blur = image_road_rgb;
@@ -115,7 +115,7 @@ ylabel('Saturation');
 
 % Put the results in a scaled image. 
 figure(997);
-imagesc(flipud(counts_contour), 'XData', (rounded_h-1)/Nbins + 1/(2*Nbins), 'YData', (rounded_s-1)/Nbins + + 1/(2*Nbins));
+imagesc(fliplr(counts_contour), 'XData', (rounded_h-1)/Nbins + 1/(2*Nbins), 'YData', (rounded_s-1)/Nbins + + 1/(2*Nbins));
 xlabel('Hue')
 ylabel('Saturation');
 hold on
