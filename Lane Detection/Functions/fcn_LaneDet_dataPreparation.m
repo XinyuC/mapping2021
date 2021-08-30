@@ -1,41 +1,36 @@
-function clean_marker_cluster = fcn_LaneDet_HSClustering(input_hs, k, varargin)
-% fcn_LaneDet_HSClustering
-% Perform k-means clustering to partition the dataset into k clusters,
-% and find the cluster for the lane marker accoridng to reference cluster centroid
-% Remove outliers in the marker cluster
+function image_hsv_new = fcn_LaneDet_dataPreparation(input_image, varargin)
+% fcn_LaneDet_dataPreparation
+% Resize the input image to an appropriate size.
+% Convert the RGB image to HSV image if necessary.
+% Apply gamma correction to adjust brightness and contrast.
 %
 % FORMAT:
 %
-%      marker_cluster = fcn_LaneDet_HSClustering(input_hs, k, varagin)
+%      image_hsv_new = fcn_LaneDet_dataPreparation(input_image, varargin)
 %
 % INPUTS:
 %
-%      input_hs: a NxM-by-2 array of hue and saturation values.
-%
-%      k: a scalar of number of clusters 
-%    
+%      input_image: a N-by-M-by-3 array of RGB or HSV values.
 %
 %      (optional inputs)
 %
 %      fig_num: figure number where results are plotted
 % 
-%      C_ref: reference cluster centroid
 %
 % OUTPUTS:
 %
-%      clean_marker_cluster: a array of hue and saturation values for
-%      the marker cluster
+%      image_hsv_new: a N-by-M-by-3 array of HSV values.
 %
 % EXAMPLES:
 % 
-% See the script: script_test_fcn_LaneDet_CreatMask for a full test 
+% See the script: script_test_fcn_LaneDet_yellowThresholding for a full test 
 % suite.
 %
 % DEPENDENCIES:
 %
 %     fcn_LaneDet_checkInputsToFunctions
 
-% This function was written on 2021_06_24 by Xinyu Cao
+% This function was written on 2021_07_27 by Xinyu Cao
 % Questions or comments? xfc5113@psu.edu
 %
 
@@ -48,6 +43,8 @@ if flag_do_debug
     st = dbstack; %#ok<*UNRCH>
     fprintf(1,'STARTING function: %s, in file: %s\n',st(1).name,st(1).file);
 end
+
+
 %% check input arguments
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   _____                   _       
@@ -60,19 +57,19 @@ end
 %              |_|                  
 % See: http://patorjk.com/software/taag/#p=display&f=Big&t=Inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% Check inputs
 if flag_check_inputs == 1   
     % Are there the right number of inputs?
-    if nargin < 2 || nargin > 4
+    if nargin < 1 || nargin > 2
         error('Incorrect number of input arguments')
     end
-    
     % Check the string input, make sure it is characters
-    fcn_LaneDet_checkInputsToFunctions(input_hs, 'hs_array');
+    fcn_LaneDet_checkInputsToFunctions(input_image, 'input_image');
     
 end
 
-if 3 == nargin
+% Does user want to show the plots?
+if 2 == nargin
     fig_num = varargin{1};
     figure(fig_num);
     flag_do_plots = 1;
@@ -94,17 +91,23 @@ end
 %  |_|  |_|\__,_|_|_| |_|
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The class of RGB image is Uint8, and the class of HSV image is double.
 
-[idx, C] =kmeans(input_hs ,k); % Use k-mean clustering to partition the final_data into k clusters
-C_ref = [0.11, 0.5]; % Default reference cluster centroid
-dists = vecnorm(C  - C_ref,2,2);
-[markerDist,markerIndex] = min(dists); % Find the index of the closest cluster
-marker_cluster = input_hs(idx == markerIndex,:); % Grab all the data point in the cluster
-marker_h = marker_cluster(:,1);
-marker_s = marker_cluster(:,2);
-[marker_h_routliers, marker_TF_h] = rmoutliers(marker_h); % Remove outliers
-[marker_s_routliers, marker_TF_s] = rmoutliers(marker_s); % Remove outliers
-clean_marker_cluster =marker_cluster((~marker_TF_h)&(~marker_TF_s),:); %Grab the clean data
+% If the class is double, input image is an HSV image, otherwise, 
+% the image is an RGB image, the image need to be converted. 
+if isa(input_image, 'double') % If the class is double,input image is an HSV image.
+    image_hsv = input_image; % The input image can be used directly.
+else
+    image_hsv = rgb2hsv(input_image); % Convert the RGB image to HSV image.
+end
+v_value = image_hsv(:,:,3); % Grab the V values of the HSV image.
+v_mean = mean(v_value, 'all');% Calculate the average V value.
+% Apply gamma correction
+gamma = v_mean/0.4; % Calculate the value of gamma
+new_v = 1 * (v_value/1).^(gamma); % Encode gamma correction
+image_hsv_new = image_hsv; % Define the output
+image_hsv_new(:,:,3) = new_v; % Assign the transformed V values to image
+
 %% Any debugging?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -119,27 +122,18 @@ clean_marker_cluster =marker_cluster((~marker_TF_h)&(~marker_TF_s),:); %Grab the
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if flag_do_plots
+    % Show the comparision between the original image and transformed image
+    if image_class == 'double'
+        image_rgb = hsv2rgb(image_hsv);
+    else
+        image_rgb = input_image;
+    end
+    image_rgb_new = hsv2rgb(image_hsv_new);
     figure(fig_num)
-    % Plot the marker cluster
-    plot(marker_cluster(:,1),marker_cluster(:,2), 'b.', 'Markersize', 1.5)
-    % Set x and y axis limits
-    xlim([0 1]);
-    ylim([0 1]);
-    
-    title('Marker Cluster')
-    
-    figure(fig_num + 1)
-    % Plot the marker cluster without outliers
-    plot(clean_marker_cluster(:,1),clean_marker_cluster(:,2), 'r.', 'Markersize', 1.5)
-    % Add title
-    title('Marker Cluster Without Outliers')
-    % Set x and y axis limits
-    xlim([0 1]);
-    ylim([0 1]);
-   
+    imshowpair(image_rgb, image_rgb_new, 'montage')
 end
 
 if flag_do_debug
     fprintf(1,'ENDING function: %s, in file: %s\n\n',st(1).name,st(1).file); 
 end
-end % End of function   
+end % Ends main function   

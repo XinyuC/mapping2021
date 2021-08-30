@@ -41,36 +41,34 @@ all_hsv = reshape(image_hsv, Nrows*Ncols, Npages);
 all_hs = all_hsv(:,1:2);
 all_v = all_hsv(:,3);
 
-%% image_rgb
+%% input_image
 
-%   _                                        _     
-%  (_)                                      | |    
-%   _ _ __ ___   __ _  __ _  ___   _ __ __ _| |__  
-%  | | '_ ` _ \ / _` |/ _` |/ _ \ | '__/ _` | '_ \ 
-%  | | | | | | | (_| | (_| |  __/ | | | (_| | |_) |
-%  |_|_| |_| |_|\__,_|\__, |\___| |_|  \__, |_.__/ 
-%                      __/ |  ______    __/ |      
-%                     |___/  |______|  |___/       
+%   _                   _     _                            
+%  (_)                 | |   (_)                           
+%   _ _ __  _ __  _   _| |_   _ _ __ ___   __ _  __ _  ___ 
+%  | | '_ \| '_ \| | | | __| | | '_ ` _ \ / _` |/ _` |/ _ \
+%  | | | | | |_) | |_| | |_  | | | | | | | (_| | (_| |  __/
+%  |_|_| |_| .__/ \__,_|\__| |_|_| |_| |_|\__,_|\__, |\___|
+%          | |           ______                  __/ |     
+%          |_|          |______|                |___/      
+%     
 
 %% Test the image_rgb (success)
-fcn_LaneDet_checkInputsToFunctions(image_rgb, 'image_rgb')
+fcn_LaneDet_checkInputsToFunctions(image_rgb, 'input_image')
 
 %% Test the image_rgb (Size error)
 fcn_LaneDet_checkInputsToFunctions(all_hsv, 'image_rgb')
 
-%% Test the image_rgb (Data type error)
-fcn_LaneDet_checkInputsToFunctions(image_hsv, 'image_rgb')
-
 %% image_hsv
-
-%   _                                        _     
-%  (_)                                      | |    
-%   _ _ __ ___   __ _  __ _  ___   _ __ __ _| |__  
-%  | | '_ ` _ \ / _` |/ _` |/ _ \ | '__/ _` | '_ \ 
-%  | | | | | | | (_| | (_| |  __/ | | | (_| | |_) |
-%  |_|_| |_| |_|\__,_|\__, |\___| |_|  \__, |_.__/ 
-%                      __/ |  ______    __/ |      
-%                     |___/  |______|  |___/       
+%   _                              _               
+%  (_)                            | |              
+%   _ _ __ ___   __ _  __ _  ___  | |__  _____   __
+%  | | '_ ` _ \ / _` |/ _` |/ _ \ | '_ \/ __\ \ / /
+%  | | | | | | | (_| | (_| |  __/ | | | \__ \\ V / 
+%  |_|_| |_| |_|\__,_|\__, |\___| |_| |_|___/ \_/  
+%                      __/ |  ______               
+%                     |___/  |______|              
+%    
 
 %% Test the image_rgb (success)
 fcn_LaneDet_checkInputsToFunctions(image_hsv, 'image_hsv')

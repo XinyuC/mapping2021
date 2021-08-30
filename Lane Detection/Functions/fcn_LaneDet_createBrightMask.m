@@ -1,31 +1,29 @@
-function clean_marker_cluster = fcn_LaneDet_HSClustering(input_hs, k, varargin)
-% fcn_LaneDet_HSClustering
-% Perform k-means clustering to partition the dataset into k clusters,
-% and find the cluster for the lane marker accoridng to reference cluster centroid
-% Remove outliers in the marker cluster
-%
+function brightMask = fcn_LaneDet_createBrightMask(image,varargin)
+% fcn_LaneDet_createWhiteMask
+% Convert the red, green, and blue values of an RGB image to 
+% hue, saturation, and value (HSV) values of an HSV image
+% Contruct a mask for the yello line marker, then perform dilations and
+% erosions to remove any small blobs left in the mask
+
 % FORMAT:
 %
-%      marker_cluster = fcn_LaneDet_HSClustering(input_hs, k, varagin)
+%      [hueMask, satMask, hsMask] = fcn_LaneDet_createYellowMask(image,varagin)
 %
 % INPUTS:
 %
-%      input_hs: a NxM-by-2 array of hue and saturation values.
-%
-%      k: a scalar of number of clusters 
-%    
+%      image: a N-by-M-by-3 array of red, green and blue values.
 %
 %      (optional inputs)
 %
 %      fig_num: figure number where results are plotted
-% 
-%      C_ref: reference cluster centroid
 %
 % OUTPUTS:
 %
-%      clean_marker_cluster: a array of hue and saturation values for
-%      the marker cluster
+%      hueMask: a N-by-M binary matrix 
 %
+%      satMask: a N-by-M binary matrix
+%
+%      hsMask: a N-by-M binary matrix
 % EXAMPLES:
 % 
 % See the script: script_test_fcn_LaneDet_CreatMask for a full test 
@@ -34,11 +32,15 @@ function clean_marker_cluster = fcn_LaneDet_HSClustering(input_hs, k, varargin)
 % DEPENDENCIES:
 %
 %     fcn_LaneDet_checkInputsToFunctions
-
-% This function was written on 2021_06_24 by Xinyu Cao
+%     fcn_LaneDet_ImagePreprocessing
+%     fcn_LaneDet_determineNumberOfClusters
+%     fcn_LaneDet_HSClustering
+%
+% This function was written on 2021_06_27 by Xinyu Cao
 % Questions or comments? xfc5113@psu.edu
 %
-
+% TODO:
+%   V values also need to be cleaned in the future
 
 flag_do_debug = 0; % Flag to debug the results
 flag_do_plots = 0; % Flag to plot the results
@@ -63,16 +65,16 @@ end
 
 if flag_check_inputs == 1   
     % Are there the right number of inputs?
-    if nargin < 2 || nargin > 4
+    if nargin < 1 || nargin > 2
         error('Incorrect number of input arguments')
     end
     
     % Check the string input, make sure it is characters
-    fcn_LaneDet_checkInputsToFunctions(input_hs, 'hs_array');
+    fcn_LaneDet_checkInputsToFunctions(image, 'image_rgb');
     
 end
 
-if 3 == nargin
+if 2 == nargin
     fig_num = varargin{1};
     figure(fig_num);
     flag_do_plots = 1;
@@ -84,6 +86,7 @@ else
     end
 end
 
+
 %% Start of main code
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   __  __       _
@@ -94,17 +97,20 @@ end
 %  |_|  |_|\__,_|_|_| |_|
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Convert 
+image_hsv = rgb2hsv(image);
+% Call fcn_LaneDet_ImagePreprocessing
+[all_hsv, clean_hsv] = fcn_LaneDet_ImagePreprocessing(image_hsv);
+clean_v = clean_hsv(:,3);
+all_h = all_hsv(:,1);
+all_v = all_hsv(:,3);
+k  = fcn_LaneDet_determineNumberOfClusters(all_h, all_v);
+bright_cluster = fcn_LaneDet_VClustering(clean_v,k);
+mean_v = mean(bright_cluster);
+valMask = (image_hsv(:,:,3) > mean_v); % Creat Value Mask
+se = strel('disk',5);
+brightMask = imopen(valMask, se);
 
-[idx, C] =kmeans(input_hs ,k); % Use k-mean clustering to partition the final_data into k clusters
-C_ref = [0.11, 0.5]; % Default reference cluster centroid
-dists = vecnorm(C  - C_ref,2,2);
-[markerDist,markerIndex] = min(dists); % Find the index of the closest cluster
-marker_cluster = input_hs(idx == markerIndex,:); % Grab all the data point in the cluster
-marker_h = marker_cluster(:,1);
-marker_s = marker_cluster(:,2);
-[marker_h_routliers, marker_TF_h] = rmoutliers(marker_h); % Remove outliers
-[marker_s_routliers, marker_TF_s] = rmoutliers(marker_s); % Remove outliers
-clean_marker_cluster =marker_cluster((~marker_TF_h)&(~marker_TF_s),:); %Grab the clean data
 %% Any debugging?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -120,26 +126,13 @@ clean_marker_cluster =marker_cluster((~marker_TF_h)&(~marker_TF_s),:); %Grab the
 
 if flag_do_plots
     figure(fig_num)
-    % Plot the marker cluster
-    plot(marker_cluster(:,1),marker_cluster(:,2), 'b.', 'Markersize', 1.5)
-    % Set x and y axis limits
-    xlim([0 1]);
-    ylim([0 1]);
-    
-    title('Marker Cluster')
-    
-    figure(fig_num + 1)
-    % Plot the marker cluster without outliers
-    plot(clean_marker_cluster(:,1),clean_marker_cluster(:,2), 'r.', 'Markersize', 1.5)
-    % Add title
-    title('Marker Cluster Without Outliers')
-    % Set x and y axis limits
-    xlim([0 1]);
-    ylim([0 1]);
-   
+    imshow(valMask)
+    title('Hue Mask')
 end
 
 if flag_do_debug
     fprintf(1,'ENDING function: %s, in file: %s\n\n',st(1).name,st(1).file); 
 end
 end % End of function   
+
+

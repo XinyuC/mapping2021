@@ -25,9 +25,12 @@ function fcn__LaneDet_checkInputsToFunctions(...
 %      variable_type_string: a string representing the variable type to
 %      check. The current strings include:
 %
-%            'image_rgb' - checks that the image size is N-by-M-by-3 and
-%            its data type is 'unit8'
+%            'input_image' - checks that the image size is N-by-M-by-3 and
+%            its data type is 'unit8' or 'double'
 %
+%            'image_hsv' - checks that the image size is N-by-M-by-3 and
+%            all the values are in the range [0 1]
+
 %            'hsv_array' - checks that the hsv_array size is NxM-by-3 and its
 %            data type is 'double'
 %
@@ -59,7 +62,7 @@ function fcn__LaneDet_checkInputsToFunctions(...
 % Questions or comments? xfc5113@psu.edu
 
 % Revision history:
-%      2021_01_06:
+%      2021_07_06:
 %      -- first write of this code 
 %      -- updated traversal type to allow above as type, added comments
 
@@ -117,18 +120,13 @@ variable_name = inputname(1);
 % Make the variable lower case
 variable_type_string = lower(variable_type_string);
 
-%% image_rgb
-if strcmpi(variable_type_string,'image_rgb')
+%% input_image
+if strcmpi(variable_type_string,'input_image')
     % Check the station input
     sz = size(variable); 
     % Check the size of the image_rgb input
     if (length(sz) ~= 3) 
-        error('The %s input must be a image_rgb type, with a size of N-by-M-by-3',variable_name);
-    end
-    
-    % Check the data type of the image_rgb input
-    if ~isa(variable,'uint8')
-        error('The %s input must be a image_rgb type, with a Unit8 data type',variable_name);
+        error('The %s input must be a input_image type, with a size of N-by-M-by-3',variable_name);
     end
 end
 
@@ -180,12 +178,26 @@ if strcmpi(variable_type_string,'v_array')
     % Check the size of the hsv_array input
     sz = size(variable); 
     if (length(sz) ~= 2) || (sz(2) ~= 1)
-        error('The %s input must be a hs_array type, with a size of NxM-by-2',variable_name);
+        error('The %s input must be a v_array type, with a size of NxM-by-1',variable_name);
     end
     
     % Check the data type of the hsv_array input
     if ~isa(variable,'double')
-        error('The %s input must be a hs_array type, with a double-precision data type',variable_name);
+        error('The %s input must be a v_array type, with a double-precision data type',variable_name);
+    end
+end
+
+%% binary_image
+if strcmpi(variable_type_string,'binary_image')
+    % Check the size of the binaey_image input
+    sz = size(variable); 
+    if length(sz) ~= 2
+        error('The %s input must be a binary_image type, with a size of N-by-M',variable_name);
+    end
+    
+    % Check the data type of the hsv_array input
+    if ~isa(variable,'logical')
+        error('The %s input must be a binary_image type, with a logical data type',variable_name);
     end
 end
 
