@@ -23,7 +23,7 @@ for n = 1:nfiles;
 end
 
 %% 
-i = 1;
+i = 3;
 image_rgb = images_rgb{i};
 % Create the yellow
 yellow_mask = fcn_LaneDet_yellowThresholding(image_rgb); % Call fcn_LaneDet_yellowThresholding
@@ -36,3 +36,16 @@ imshow(yellow_mask)
 clean_mask = fcn_LaneDet_ErodeAndDilate(yellow_mask);
 figure(2)
 imshow(clean_mask)
+
+
+%%
+image_hsv = fcn_LaneDet_dataPreparation(image_rgb);
+% Call fcn_LaneDet_removeNoise
+clean_image_hsv = fcn_LaneDet_removeNoise(image_hsv);
+sz = size(clean_image_hsv);
+Nrows = sz(1);
+Ncols = sz(2);
+clean_hs_array = reshape(clean_image_hsv(:,:,1:2), Nrows*Ncols, 2);
+clean_hs_array(isnan(clean_hs_array)) = 0;
+[idx, C] =kmeans(clean_hs_array ,2);
+plot(clean_hs_array(:,1), clean_hs_array(:,2),'.')

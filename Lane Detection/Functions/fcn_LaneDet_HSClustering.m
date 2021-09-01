@@ -1,4 +1,4 @@
-function clean_marker_cluster = fcn_LaneDet_HSClustering(input_hs, k, varargin)
+function clean_marker_cluster = fcn_LaneDet_HSClustering(clean_image_hsv, varargin)
 % fcn_LaneDet_HSClustering
 % Perform k-means clustering to partition the dataset into k clusters,
 % and find the cluster for the lane marker accoridng to reference cluster centroid
@@ -68,7 +68,7 @@ if flag_check_inputs == 1
     end
     
     % Check the string input, make sure it is characters
-    fcn_LaneDet_checkInputsToFunctions(input_hs, 'hs_array');
+    fcn_LaneDet_checkInputsToFunctions(clean_image_hsv, 'hs_array');
     
 end
 
@@ -94,8 +94,12 @@ end
 %  |_|  |_|\__,_|_|_| |_|
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-[idx, C] =kmeans(input_hs ,k); % Use k-mean clustering to partition the final_data into k clusters
+sz = size(clean_image_hsv);
+Nrows = sz(1);
+Ncols = sz(2);
+clean_hs_array = reshape(clean_image_hsv(:,:,2), Nrows*Ncols, 2);
+clean_hs_array(isnan(clean_hs_array)) = 0;
+[idx, C] =kmeans(clean_hs_array ,2); % Use k-mean clustering to partition the final_data into k clusters
 C_ref = [0.11, 0.5]; % Default reference cluster centroid
 dists = vecnorm(C  - C_ref,2,2);
 [markerDist,markerIndex] = min(dists); % Find the index of the closest cluster
