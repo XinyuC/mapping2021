@@ -102,15 +102,26 @@ end
 image_hsv = fcn_LaneDet_dataPreparation(image);
 % Call fcn_LaneDet_removeNoise
 clean_image_hsv = fcn_LaneDet_removeNoise(image_hsv);
-h_low = 0.1;
-h_high = 0.15;
-yellow_mask = clean_image_hsv;
-clean_h = clean_image_hsv(:,:,1);
-sz = size(clean_h);
-Ncols = sz(2); % Extract the number of columns
-yellow_mask = (clean_h < h_high)&(clean_h > h_low);
-
-
+% Get the size of the multidimensional arrays
+sz = size(clean_image_hsv);
+Nrows = sz(1);
+Ncols = sz(2);
+% Reshape the first two pages into a NrowsxNcols-by-2 array
+clean_hs_array = reshape(clean_image_hsv(:,:,1:2), Nrows*Ncols, 2);
+% Grab all non NaN values in the array
+hs_target = clean_hs_array(~isnan(clean_hs_array(:,1)),:);
+% Remove the outliers of the array
+[hs_clean, hs_TF] = rmoutliers(hs_target);
+% Define the thresholding boundary for Hue and Saturation value
+h_lower = min(hs_clean(:,1));
+h_upper = max(hs_clean(:,1));
+s_lower = min(hs_clean(:,2));
+s_upper = max(hs_clean(:,2));
+% Create the hue and saturation mask
+hue_mask = (clean_image_hsv(:,:,1) < h_upper)&(clean_image_hsv(:,:,1) > h_lower);
+sat_mask = (clean_image_hsv(:,:,2) < s_upper)&(clean_image_hsv(:,:,2) > s_lower);
+% Combine hue and saturation mask
+yellow_mask = hue_mask&sat_mask;
 
 %% Any debugging?
 
