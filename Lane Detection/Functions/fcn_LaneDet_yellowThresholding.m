@@ -118,10 +118,12 @@ h_upper = max(hs_clean(:,1));
 s_lower = min(hs_clean(:,2));
 s_upper = max(hs_clean(:,2));
 % Create the hue and saturation mask
-hue_mask = (clean_image_hsv(:,:,1) < h_upper)&(clean_image_hsv(:,:,1) > h_lower);
-sat_mask = (clean_image_hsv(:,:,2) < s_upper)&(clean_image_hsv(:,:,2) > s_lower);
+disp([h_upper,h_lower]);
+% hue_mask = (clean_image_hsv(:,:,1) <= h_upper)&(clean_image_hsv(:,:,1) >= h_lower);
+% sat_mask = (clean_image_hsv(:,:,2) <= s_upper)&(clean_image_hsv(:,:,2) >= s_lower);
 % Combine hue and saturation mask
-yellow_mask = hue_mask&sat_mask;
+% yellow_mask = hue_mask&sat_mask;
+yellow_mask = clean_image_hsv;
 
 %% Any debugging?
 

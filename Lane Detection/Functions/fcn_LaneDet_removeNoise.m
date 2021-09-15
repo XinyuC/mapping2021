@@ -100,17 +100,20 @@ sz = size(image_hsv); % Grab the size of the image
 Nrows = sz(1); % Extract the number of rows
 Ncols = sz(2); % Extract the number of columns
 Npages = sz(3);% Extract the number of pages
-v_low = 0.3; % Set the cut off value for Value
-s_low = 0.3; % Set the cut off value for Saturation
-h_low = 0.1; % Set the lower cut off value for Hue
-h_high = 0.14; % Set the higher cut off value for Hue
+v_low = 0.4; % Set the cut off value for Value
+s_low = 0.35; % Set the cut off value for Saturation
+h_low = 0.08; % Set the lower cut off value for Hue
+h_high = 0.16; % Set the higher cut off value for Hue
 h_value = image_hsv(:,:,1); % Grab all Hue values
 s_value = image_hsv(:,:,2); % Grab all Saturation values
 v_value = image_hsv(:,:,3); % Grab all Value values
+% mean_s = mean(s_value, 'all');
+% mean_v = mean(v_value, 'all');
+% disp([mean_s,mean_v]);
 clean_image_hsv = image_hsv; % Create a copy of the HSV image;
 for j = 1:Ncols;
-    clean_image_hsv(v_value(:,j)< v_low, j, :) = nan;
-    clean_image_hsv(s_value(:,j)< s_low, j, :) = nan;
+%     clean_image_hsv(v_value(:,j)< v_low, j, :) = nan;
+%     clean_image_hsv(s_value(:,j)< s_low, j, :) = nan;
     clean_image_hsv((h_value(:,j) >= h_high)|(h_value(:,j) <= h_low), j, :) = nan;
 end
 
