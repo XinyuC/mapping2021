@@ -1,3 +1,5 @@
+% Find the coordinate of the brighest point on the geoplot and covert it to LLA coordinate.
+
 %% Define maps
 % Set up the plot sources
 % See: https://www.mathworks.com/help/map/ref/addcustombasemap.html for
